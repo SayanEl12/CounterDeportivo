@@ -1,7 +1,7 @@
 # Analysis & Design — App de Entrenamientos
 
 > **Fase 2 · Análisis y diseño**
-> Autor: Juan José Palacio Madrid · Versión: 0.1 · Fecha: 2026-11-18 · Estado: 🟡 En progreso
+> Autor: Santiago Herrera · Versión: 0.1 · Fecha: 2026-11-20 · Estado: 🟡 En progreso
 > Entrada: [Requirements Gathering](./Requirements_Gathering.md)
 
 En la fase 1 definiste **qué** hace la app. Aquí decides **cómo** se va a construir, sin escribir código todavía. Cada decisión debe poder rastrearse a un requisito (RF, RNF o RN).
