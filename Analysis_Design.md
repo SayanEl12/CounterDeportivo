@@ -1,12 +1,10 @@
 # Analysis & Design — App de Entrenamientos
 
 > **Fase 2 · Análisis y diseño**
-> Autor: Santiago Herrera · Versión: 0.1 · Fecha: 2026-11-20
+> Autor: Santiago Herrera · Versión: 1.0 · Fecha: 2026-11-20 · Estado: ✅ Cerrada
 > Entrada: [Requirements Gathering](./Requirements_Gathering.md)
 
-En la fase 1 definiste **qué** hace la app. Aquí decides **cómo** se va a construir, sin escribir código todavía. Cada decisión debe poder rastrearse a un requisito (RF, RNF o RN).
-
-**Cómo usar esta guía:** cada sección trae *Qué es*, *Preguntas guía* y espacios `TODO` para llenar. Los ejemplos resueltos son de referencia: ajústalos o reemplázalos.
+En la fase 1 se definió **qué** hace la app. Este documento define **cómo** se va a construir, sin escribir código todavía. Cada decisión se puede rastrear a un requisito (RF, RNF o RN).
 
 ---
 
@@ -16,16 +14,17 @@ En la fase 1 definiste **qué** hace la app. Aquí decides **cómo** se va a con
 2. [Modelo de datos](#2-modelo-de-datos)
 3. [Arquitectura](#3-arquitectura)
 4. [Stack tecnológico](#4-stack-tecnológico)
-5. [Diseño de pantallas (wireframes)](#5-diseño-de-pantallas-wireframes)
+5. [Diseño de pantallas](#5-diseño-de-pantallas)
 6. [Flujo offline y sincronización](#6-flujo-offline-y-sincronización)
 7. [Matriz de trazabilidad](#7-matriz-de-trazabilidad)
 8. [Plan de implementación](#8-plan-de-implementación)
+9. [Cierre de la fase](#9-cierre-de-la-fase)
 
 ---
 
 ## 1. Casos de uso
 
-Cada historia de usuario se convierte en un caso de uso con el paso a paso de la interacción, incluidos los errores. Sirve para descubrir pantallas, validaciones y casos borde.
+Cada historia de usuario se convierte en un caso de uso con el paso a paso de la interacción, incluidos los errores. Sirven para descubrir pantallas, validaciones y casos borde.
 
 ### Lista de casos de uso
 
@@ -40,24 +39,22 @@ Cada historia de usuario se convierte en un caso de uso con el paso a paso de la
 | **CU-07** | Consultar total de entrenamientos | Usuario | RF-04 | 🟠 Should |
 | **CU-08** | Comparar metas vs. entrenamientos | Usuario | RF-06 | 🟠 Should |
 | **CU-09** | Sincronizar cambios pendientes | Usuario | RNF-02 | 🔴 Must |
-| **CU-10** | Gestionar tipos de entrenamiento *(propuesto)* | Usuario | M-01 | 🔴 Must |
-
-### Tus casos de uso detallados
+| **CU-10** | Gestionar tipos de entrenamiento | Usuario | RF-08, M-01 | 🔴 Must |
 
 ### Flujo común FC-01 — Guardar cambio
 
-Todos los casos que crean, editan o eliminan terminan en este flujo (la parte derecha del diagrama).
+Todos los casos que crean, editan o eliminan terminan en este flujo.
 
 | Paso | Detalle |
 | --- | --- |
 | **1** | El sistema verifica si hay conexión a internet. |
-| **2** | **Con internet:** la BD valida el cambio y lo guarda. El listado se actualiza. |
-| **2a** | **Sin internet:** el cambio se guarda localmente, marcado como pendiente. Se continúa en CU-09. |
-| **2b** | **La BD rechaza el cambio:** el sistema muestra el error y mantiene el formulario con los datos ingresados. |M-04
+| **2** | **Con internet:** la API valida el cambio y lo guarda en la BD. El listado se actualiza. |
+| **2a** | **Sin internet:** el cambio se guarda en local (IndexedDB), marcado como pendiente. Se continúa en CU-09. |
+| **2b** | **La API rechaza el cambio:** el sistema muestra el error y mantiene el formulario con los datos ingresados. |
 
----
+### Casos de uso detallados
 
-### CU-01 — Registrar entrenamiento
+#### CU-01 — Registrar entrenamiento
 
 | Campo | Detalle |
 | --- | --- |
@@ -68,7 +65,7 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Flujos alternos** | **4a.** El usuario oprime **Cancelar** → el formulario se cierra sin guardar.<br>**5a.** Hay campos vacíos → el sistema los resalta con un mensaje y vuelve al paso 3. |
 | **Postcondición** | El entrenamiento queda guardado en la BD o en local como pendiente. |
 
-### CU-02 — Editar entrenamiento
+#### CU-02 — Editar entrenamiento
 
 | Campo | Detalle |
 | --- | --- |
@@ -79,7 +76,7 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Flujos alternos** | **4a.** El usuario oprime **Cancelar** → no se guarda ningún cambio.<br>**5a.** Hay campos vacíos → el sistema los resalta y vuelve al paso 3. |
 | **Postcondición** | El entrenamiento queda actualizado. |
 
-### CU-03 — Eliminar entrenamiento
+#### CU-03 — Eliminar entrenamiento
 
 | Campo | Detalle |
 | --- | --- |
@@ -88,9 +85,9 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Precondición** | Existe al menos un entrenamiento en el listado. |
 | **Flujo principal** | 1. El usuario oprime un entrenamiento del listado.<br>2. El sistema abre el formulario *Entrenamiento* con sus datos.<br>3. El usuario oprime **Eliminar** 🗑️.<br>4. El sistema pide confirmación.<br>5. El usuario confirma.<br>6. Se ejecuta **FC-01**.<br>7. El entrenamiento desaparece del listado. |
 | **Flujos alternos** | **5a.** El usuario cancela la confirmación → vuelve al formulario sin cambios. |
-| **Postcondición** | El entrenamiento queda eliminado y deja de contar en las estadísticas. |
+| **Postcondición** | El entrenamiento queda eliminado (*soft delete*) y deja de contar en las estadísticas. |
 
-### CU-04 — Crear meta
+#### CU-04 — Crear meta
 
 | Campo | Detalle |
 | --- | --- |
@@ -101,7 +98,7 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Flujos alternos** | **3a.** El usuario agrega un tipo que ya está en la meta → el sistema no lo permite.<br>**5a.** El usuario oprime **Cancelar** → no se guarda.<br>**6a.** Hay campos vacíos o ningún tipo → mensaje y vuelve al paso 3.<br>**6b.** `fecha_fin` ≤ `fecha_inicio` → mensaje y vuelve al paso 4. |
 | **Postcondición** | La meta queda guardada y disponible en el filtro de Estadísticas. |
 
-### CU-05 — Editar meta
+#### CU-05 — Editar meta
 
 | Campo | Detalle |
 | --- | --- |
@@ -112,7 +109,7 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Flujos alternos** | **4a.** El usuario oprime **Cancelar** → no se guarda ningún cambio.<br>**5a.** La validación falla → mensaje y vuelve al paso 3. |
 | **Postcondición** | La meta queda actualizada y la comparación de Estadísticas la refleja. |
 
-### CU-06 — Eliminar meta
+#### CU-06 — Eliminar meta
 
 | Campo | Detalle |
 | --- | --- |
@@ -123,49 +120,47 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | **Flujos alternos** | **5a.** El usuario cancela la confirmación → vuelve al formulario sin cambios. |
 | **Postcondición** | La meta se elimina; los entrenamientos registrados no se modifican. |
 
-### CU-07 — Consultar total de entrenamientos
+#### CU-07 — Consultar total de entrenamientos
 
 | Campo | Detalle |
 | --- | --- |
 | **Actor** | Usuario |
 | **Requisitos** | RF-04 |
-| **Precondición** | Ninguna. |
-| **Flujo principal** | 1. El usuario abre la pestaña **Estadísticas**.<br>2. El sistema muestra la gráfica de total de entrenamientos con el filtro por defecto (TODO: definir, p. ej. semana actual).<br>3. El usuario cambia el filtro de tiempo (semana / mes) o de tipo.<br>4. El sistema consulta los datos y actualiza la gráfica. |
-| **Flujos alternos** | **4a.** No hay entrenamientos en el periodo → el sistema muestra "Sin entrenamientos en este periodo".<br>**4b.** Sin internet → TODO: definir si se grafica con los datos locales. |
+| **Precondición** | Hay conexión a internet. |
+| **Flujo principal** | 1. El usuario abre la pestaña **Estadísticas**.<br>2. El sistema muestra la gráfica de total de entrenamientos de la **semana actual** (filtro por defecto).<br>3. El usuario cambia el filtro de tiempo (semana / mes) o de tipo.<br>4. El sistema consulta la API y actualiza la gráfica. |
+| **Flujos alternos** | **4a.** No hay entrenamientos en el periodo → el sistema muestra "Sin entrenamientos en este periodo".<br>**4b.** Sin internet → el sistema muestra "Estadísticas no disponibles sin conexión". |
 | **Postcondición** | Ninguna (solo consulta). |
 
-### CU-08 — Comparar metas vs. entrenamientos
+#### CU-08 — Comparar metas vs. entrenamientos
 
 | Campo | Detalle |
 | --- | --- |
 | **Actor** | Usuario |
 | **Requisitos** | RF-06 |
-| **Precondición** | Existe al menos una meta. |
+| **Precondición** | Hay conexión a internet y existe al menos una meta. |
 | **Flujo principal** | 1. El usuario abre la pestaña **Estadísticas**.<br>2. El usuario selecciona una meta en el filtro.<br>3. El sistema consulta los entrenamientos de cada tipo de la meta dentro de su rango de fechas.<br>4. El sistema muestra la gráfica de entrenamientos hechos vs. planeados por tipo. |
-| **Flujos alternos** | **2a.** No hay metas → el sistema muestra un mensaje con acceso a **Nueva meta** (CU-04). |
+| **Flujos alternos** | **2a.** No hay metas → el sistema muestra un mensaje con acceso a **Nueva meta** (CU-04).<br>**3a.** Sin internet → el sistema muestra "Estadísticas no disponibles sin conexión". |
 | **Postcondición** | Ninguna (solo consulta). |
 
-### CU-09 — Sincronizar cambios pendientes
+#### CU-09 — Sincronizar cambios pendientes
 
 | Campo | Detalle |
 | --- | --- |
 | **Actor** | Usuario |
 | **Requisitos** | RNF-02 |
 | **Precondición** | Hay cambios guardados en local (FC-01, paso 2a). |
-| **Flujo principal** | 1. El sistema muestra el botón **Subir cambios guardados** con la cantidad de cambios pendientes.<br>2. El usuario oprime el botón.<br>3. El sistema verifica la conexión.<br>4. El sistema envía cada cambio a la BD, que lo valida y lo guarda.<br>5. El sistema limpia los pendientes, oculta el botón y actualiza los listados. |
-| **Flujos alternos** | **3a.** Sin internet → mensaje; los cambios siguen pendientes.<br>**4a.** La BD rechaza un cambio → el sistema indica cuál y lo deja pendiente para corregirlo.<br>**4b.** El registro fue modificado desde otro dispositivo → TODO: regla de conflicto (ver sección 6). |
+| **Flujo principal** | 1. El sistema muestra el botón **Subir cambios guardados** con la cantidad de cambios pendientes.<br>2. El usuario oprime el botón.<br>3. El sistema verifica la conexión.<br>4. El sistema envía los cambios a `POST /sync`; la API los valida y los guarda.<br>5. El sistema limpia los pendientes, oculta el botón y actualiza los listados. |
+| **Flujos alternos** | **3a.** Sin internet → mensaje; los cambios siguen pendientes.<br>**4a.** La API rechaza un cambio (`422`) → el sistema indica cuál y lo deja pendiente para corregirlo.<br>**4b.** El servidor tiene una versión más reciente del registro (`409`) → gana la del servidor (*last-write-wins*, sección 6) y se informa al usuario. |
 | **Postcondición** | Los datos locales y los de la BD quedan iguales. |
 
-### CU-10 — Gestionar tipos de entrenamiento *(propuesto)*
-
-> No aparece en el diagrama ni en los RF, pero M-01 es Must y el formulario necesita tipos. Decide si se vuelve **RF-08** o si los tipos se cargan solo desde la BD.
+#### CU-10 — Gestionar tipos de entrenamiento
 
 | Campo | Detalle |
 | --- | --- |
 | **Actor** | Usuario |
-| **Requisitos** | M-01 |
+| **Requisitos** | RF-08, M-01 |
 | **Precondición** | Ninguna. |
-| **Flujo principal** | 1. El usuario abre la lista de tipos.<br>2. El usuario oprime **Nuevo tipo** y escribe el nombre.<br>3. El sistema valida que el nombre no esté vacío ni repetido.<br>4. Se ejecuta **FC-01**.<br>5. El tipo queda disponible en los formularios de entrenamiento y meta. |
+| **Flujo principal** | 1. El usuario abre la pantalla **Tipos** (desde el enlace "+ Nuevo tipo" del formulario).<br>2. El usuario escribe el nombre y oprime **Agregar**.<br>3. El sistema valida que el nombre no esté vacío ni repetido.<br>4. Se ejecuta **FC-01**.<br>5. El tipo queda disponible en los formularios de entrenamiento y meta. |
 | **Flujos alternos** | **3a.** Nombre vacío o repetido → mensaje y vuelve al paso 2.<br>**3b.** Se intenta eliminar un tipo con entrenamientos asociados → el sistema no lo permite. |
 | **Postcondición** | El catálogo de tipos queda actualizado. |
 
@@ -175,14 +170,24 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 
 El modelo de dominio de la fase 1 convertido en tablas con llaves, tipos de dato y restricciones.
 
-<img width="690" height="525" alt="Bases de datos(2)" src="https://github.com/user-attachments/assets/b0469bb2-3ac4-4d21-85a1-d2ada7689ac7" />
+<img width="690" height="525" alt="Modelo entidad-relación" src="https://github.com/user-attachments/assets/b0469bb2-3ac4-4d21-85a1-d2ada7689ac7" />
+
+| Tabla | Propósito |
+| --- | --- |
+| `tipo` | Catálogo de tipos de entrenamiento. |
+| `entrenamiento` | Cada sesión registrada (fecha, hora, tipo). |
+| `meta` | Rango de fechas de la meta. |
+| `meta_tipo` | Tabla intermedia de la relación N:M: cantidad planeada por tipo dentro de una meta. |
+
+**Convenciones para todas las tablas:** llave primaria `id` de tipo UUID, y campos técnicos `created_at`, `updated_at` y `deleted_at` para la sincronización (sección 6).
 
 ---
 
 ## 3. Arquitectura
 
-cómo se organizan las partes del sistema y cómo se comunican. RNF-01 (web responsive) y RNF-02 (offline) son los requisitos que más la condicionan.
-**Cliente web + API REST propia + PostgreSQL**
+**Decisión:** cliente web + API REST propia + PostgreSQL (opción B), sin PWA. RNF-01 (web responsive) y RNF-02 (offline) son los requisitos que más la condicionan.
+
+**Justificación:** la API concentra toda la lógica, así que la futura app móvil podrá usar la misma API sin cambiar el backend. El backend es un solo servicio dividido en capas, fácil de desplegar y de ampliar.
 
 ### 3.1 Estilo arquitectónico
 
@@ -197,14 +202,12 @@ cómo se organizan las partes del sistema y cómo se comunican. RNF-01 (web resp
 
 ### 3.2 Componentes
 
-Usa esta lista como los **nodos** de tu diagrama.
-
 #### Capa cliente
 
 | # | Componente | Responsabilidad |
 | --- | --- | --- |
 | C1 | **Web SPA** (v1) | Interfaz responsive para celular y PC. |
-| C1.1 | Páginas y componentes | Pantalla principal, formularios, Estadísticas. |
+| C1.1 | Páginas y componentes | Pantalla principal, formularios, Estadísticas, Tipos. |
 | C1.2 | Estado / hooks | Datos en pantalla, validación de UX (campos vacíos, RN-03). |
 | C1.3 | API client (services) | Única capa que habla con la API (`entrenamientosApi`, `metasApi`…). |
 | C1.4 | Almacén local (IndexedDB) | Cola de cambios pendientes cuando no hay conexión. |
@@ -234,8 +237,6 @@ Usa esta lista como los **nodos** de tu diagrama.
 | I4 | **GitHub** | Código fuente; a futuro CI/CD (GitHub Actions). |
 
 ### 3.3 Conexiones
-
-Usa esta tabla como las **flechas** de tu diagrama.
 
 | Origen | Destino | Qué viaja | Protocolo |
 | --- | --- | --- | --- |
@@ -269,7 +270,7 @@ Usa esta tabla como las **flechas** de tu diagrama.
 | Sincronización | `POST /sync` (lote de cambios pendientes) | CU-09 |
 | Salud | `GET /health` | Monitoreo |
 
-Documentación automática en `/docs` (Swagger UI, generado por FastAPI).
+Documentación automática en `/docs` (Swagger UI, generada por FastAPI).
 
 **Códigos de respuesta:** `200` OK · `201` creado · `204` eliminado · `404` no existe · `409` conflicto de sincronización · `422` validación fallida (RN-02, RN-03).
 
@@ -300,10 +301,11 @@ app-entrenamientos/
 ├── docs/                    # Requirements_Gathering.md, Analysis_Design.md, diagramas
 ├── frontend/
 │   └── src/
-│       ├── pages/           # Principal, Estadisticas
+│       ├── pages/           # Principal, Estadisticas, Tipos
 │       ├── components/      # Formularios, listados, gráficas
 │       ├── hooks/           # Estado y validación de UX
 │       ├── services/        # API client (único acceso a la API)
+│       ├── types/           # Tipos TypeScript del modelo
 │       └── offline/         # IndexedDB + sync manager
 ├── backend/
 │   ├── app/
@@ -320,14 +322,13 @@ app-entrenamientos/
 └── README.md
 ```
 
-### Diagrama de arquitectura
-<img width="2370" height="2377" alt="Sin título(1)" src="https://github.com/user-attachments/assets/036a2e5c-897d-401d-812c-a72b4f356902" />
+### 3.8 Diagrama de arquitectura
+
+<img width="2370" height="2377" alt="Diagrama de arquitectura" src="https://github.com/user-attachments/assets/036a2e5c-897d-401d-812c-a72b4f356902" />
 
 ---
 
 ## 4. Stack tecnológico
-
-Las herramientas concretas para cada capa. Recuerda que el stakeholder *desarrollador* quiere aprender tecnologías nuevas: elige al menos una que no domines.
 
 | Capa | Tecnología | Por qué |
 | --- | --- | --- |
@@ -340,33 +341,39 @@ Las herramientas concretas para cada capa. Recuerda que el stakeholder *desarrol
 | Base de datos | PostgreSQL | Relacional, robusta y escalable. |
 | Contenedores | Docker + Docker Compose | Mismo entorno en local y en producción. |
 | Pruebas | Pytest (backend) · Vitest (frontend) | Pruebas por capa. |
-| Hosting | TODO: elegir proveedor de frontend estático, API y Postgres administrado (revisa planes gratuitos vigentes). | — |
 | Control de versiones | Git + GitHub | Repositorio del proyecto; a futuro GitHub Actions. |
-| App móvil *(futuro)* | TODO: React Native (reutiliza React/TS) o Flutter | — |
+| Hosting | *Por definir en la fase de despliegue* | Frontend estático, API en contenedor y Postgres administrado. |
+| App móvil *(futuro)* | *Por definir:* React Native o Flutter | React Native reutiliza React y TypeScript. |
 
 ---
 
-## 5. Diseño de pantallas (wireframes)
+## 5. Diseño de pantallas
 
-Bocetos de baja fidelidad de cada pantalla. Como la app tendrá estilo ASCII, puedes hacer los wireframes directamente en ASCII: sirven de boceto y de referencia visual.
+Prototipos de alta fidelidad generados con v0 a partir de los casos de uso, con estilo ASCII (M-06).
 
-<img width="1223" height="873" alt="Screenshot 2026-11-19 at 13-28-25 TRAINING LOG — Registro de entrenamiento" src="https://github.com/user-attachments/assets/088237bc-7ca7-48b4-a2b0-b5e9acf22d20" />
-<img width="1222" height="1181" alt="Screenshot 2026-11-19 at 13-28-46 TRAINING LOG — Registro de entrenamiento" src="https://github.com/user-attachments/assets/7350f73f-0657-458f-b389-e70df5769521" />
-<img width="1225" height="826" alt="Screenshot 2026-11-19 at 13-30-28 TRAINING LOG — Registro de entrenamiento" src="https://github.com/user-attachments/assets/453fb883-faec-4efc-88ae-33f7d99b3d48" />
+<img width="1223" height="873" alt="TRAINING LOG — prototipo 1" src="https://github.com/user-attachments/assets/088237bc-7ca7-48b4-a2b0-b5e9acf22d20" />
+<img width="1222" height="1181" alt="TRAINING LOG — prototipo 2" src="https://github.com/user-attachments/assets/7350f73f-0657-458f-b389-e70df5769521" />
+<img width="1225" height="826" alt="TRAINING LOG — prototipo 3" src="https://github.com/user-attachments/assets/453fb883-faec-4efc-88ae-33f7d99b3d48" />
+
+| Pantalla | Casos de uso |
+| --- | --- |
+| Principal | CU-01, CU-02, CU-03, CU-04, CU-05, CU-06, CU-09 |
+| Formulario de entrenamiento | CU-01, CU-02, CU-03 |
+| Formulario de meta | CU-04, CU-05, CU-06 |
+| Estadísticas | CU-07, CU-08 |
+| Tipos | CU-10 |
 
 ---
 
 ## 6. Flujo offline y sincronización
 
-RNF-02 es el requisito técnico más difícil del MVP. Defínelo ahora para no improvisarlo en el código. *(Si elegiste la opción A de arquitectura, esta sección se reduce a "todo es local").*
-
-**Alcance (sin PWA):** si se pierde la conexión con la app abierta, los cambios se guardan en IndexedDB y se suben con **Subir cambios guardados** (CU-09). La app no abre sin internet.
+**Alcance (sin PWA):** si se pierde la conexión con la app abierta, los cambios se guardan en IndexedDB y se suben con **Subir cambios guardados** (CU-09). La app no abre sin internet y las estadísticas requieren conexión.
 
 | Decisión | Respuesta |
 | --- | --- |
-| Momento de sincronización | Manual, con el botón **Subir cambios guardados** (diagrama de flujo). TODO: decidir si además se intenta automáticamente al volver la conexión. |
+| Momento de sincronización | Manual, con el botón **Subir cambios guardados**. La sincronización automática al volver la conexión queda como mejora futura. |
 | Identificadores | UUID generado en el cliente al crear el registro. |
-| Campos técnicos en cada tabla | `created_at`, `updated_at` y `deleted_at` (agrégalos al modelo de la sección 2). |
+| Campos técnicos en cada tabla | `created_at`, `updated_at` y `deleted_at`. |
 | Eliminaciones | *Soft delete:* se llena `deleted_at` en lugar de borrar la fila, para que la eliminación también se sincronice. |
 | Resolución de conflictos | *Last-write-wins:* gana el cambio con `updated_at` más reciente. Si el servidor tiene uno más nuevo → `409` y se informa al usuario. |
 | Indicador visual de pendiente | Botón con el contador de cambios pendientes; se oculta en 0. |
@@ -388,26 +395,48 @@ RNF-02 es el requisito técnico más difícil del MVP. Defínelo ahora para no i
 ---
 
 ## 7. Matriz de trazabilidad
+
 Conecta cada requisito con dónde se diseña. Si un requisito no tiene pantalla o tabla, falta diseño; si una pantalla no tiene requisito, sobra.
 
 | Requisito | Caso de uso | Pantalla | Tablas | Prioridad |
 | --- | --- | --- | --- | :---: |
-| RF-01 | CU-01, CU-02, CU-03  | Principal, Formulario | `entrenamiento` | 🔴 Must |
-| RF-02 | CU-02, CU-03  | Principal, Regis Entrenos | `entrenamiento` | 🔴 Must |
-| RF-03 | CU-10 | Tipos | `Tipo` | 🔴 Must |
-| RF-04 | CU-04 | Principal, Form Metas | `Meta` | 🟠 Should |
-| RF-05 | CU-05, CU-06 | Principal, Regis Metas | `Meta` | 🟠 Should |
-| RF-06 | CU-07, CU-08 | Stats | `entrenamiento` `Meta` | 🟠 Should |
-| RF-07 | CU-09 | Principal, Sincro | `Metas` `entrenamiento` | 🟠 Should |
+| **RF-01** Guardar entrenamiento | CU-01 | Principal, Formulario de entrenamiento | `entrenamiento` | 🔴 Must |
+| **RF-02** Agregar / editar fecha, hora y tipo | CU-01, CU-02 | Formulario de entrenamiento | `entrenamiento`, `tipo` | 🔴 Must |
+| **RF-03** Eliminar entrenamiento | CU-03 | Formulario de entrenamiento | `entrenamiento` | 🔴 Must |
+| **RF-04** Total por semana / mes | CU-07 | Estadísticas | `entrenamiento`, `tipo` | 🟠 Should |
+| **RF-05** Crear meta | CU-04 | Principal, Formulario de meta | `meta`, `meta_tipo` | 🟠 Should |
+| **RF-06** Comparar metas vs. entrenamientos | CU-08 | Estadísticas | `meta`, `meta_tipo`, `entrenamiento` | 🟠 Should |
+| **RF-07** Editar / eliminar metas | CU-05, CU-06 | Principal, Formulario de meta | `meta`, `meta_tipo` | 🟠 Should |
+| **RF-08** Gestionar tipos | CU-10 | Tipos | `tipo` | 🔴 Must |
+| **RNF-02** Guardado offline | CU-09 | Principal (botón de sincronización) | Todas | 🔴 Must |
 
 ---
 
 ## 8. Plan de implementación
 
-Dividir el MVP en iteraciones cortas que terminen en algo usable. Sigue el orden de MoSCoW: primero los Must.
+El MVP se divide en iteraciones cortas que terminan en algo usable, siguiendo el orden de MoSCoW: primero los Must.
 
-| Iteración | Objetivo | Incluye (M-xx) | Entregable | Fecha objetivo |
+| Iteración | Objetivo | Incluye | Entregable | Fecha objetivo |
 | --- | --- | --- | --- | --- |
-| **1** | Registrar entrenamientos | M-01, M-02, M-03 | Puedo registrar desde el celular | Nov 21 |
-| **2** | Registrar metas y ver charts | M-04, M-05 | Puedo ver mis estadísticas | Nov 22 |
-| **3** | Diseño estilo ASCII | M-06 | Tengo un diseño responsive y agradable | Nov 23 |
+| **0** | Configurar el proyecto | Monorepo, Docker Compose, PostgreSQL, migraciones iniciales | La API responde `GET /health` y la BD tiene las tablas | 2026-11-21 |
+| **1** | Registrar entrenamientos | M-01, M-02, M-03 (CU-01, CU-02, CU-03, CU-10) | Puedo registrar desde el celular | 2026-11-21 |
+| **2** | Registrar metas y ver gráficas | M-04, M-05 (CU-04 a CU-08) | Puedo ver mis estadísticas | 2026-11-22 |
+| **3** | Diseño estilo ASCII | M-06 | Tengo un diseño responsive y agradable | 2026-11-23 |
+| **4** | Guardado offline y sincronización | RNF-02 (CU-09) | Puedo registrar sin conexión y subir los cambios | *Por definir* |
+
+**Estructura del repositorio:** ver sección 3.7.
+
+---
+
+## 9. Cierre de la fase
+
+- [x] Cada RF tiene al menos un caso de uso.
+- [x] El modelo de datos incluye todas las entidades y resuelve la relación N:M Meta ↔ Tipo.
+- [x] La arquitectura está elegida y justificada con los RNF.
+- [x] El stack está definido para cada capa del MVP.
+- [x] Hay un prototipo por pantalla.
+- [x] El flujo offline está definido.
+- [x] La matriz de trazabilidad no tiene huecos.
+- [x] El plan de implementación cubre todos los Must.
+
+➡️ **Siguiente fase:** Implementación
