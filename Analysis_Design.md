@@ -52,8 +52,8 @@ Todos los casos que crean, editan o eliminan terminan en este flujo (la parte de
 | --- | --- |
 | **1** | El sistema verifica si hay conexión a internet. |
 | **2** | **Con internet:** la BD valida el cambio y lo guarda. El listado se actualiza. |
-| **2a** | **Sin internet:** el cambio se guarda en local, marcado como pendiente. Se continúa en CU-09. |
-| **2b** | **La BD rechaza el cambio:** el sistema muestra el error y mantiene el formulario con los datos ingresados. |
+| **2a** | **Sin internet:** el cambio se guarda localmente, marcado como pendiente. Se continúa en CU-09. |
+| **2b** | **La BD rechaza el cambio:** el sistema muestra el error y mantiene el formulario con los datos ingresados. |M-04
 
 ---
 
@@ -364,7 +364,7 @@ RNF-02 es el requisito técnico más difícil del MVP. Defínelo ahora para no i
 
 | Decisión | Respuesta |
 | --- | --- |
-| Momento de sincronización | Manual, con el botón **Subir cambios guardados** (diagrama de flujo). TODO: decidir si además se intenta automático al volver la conexión. |
+| Momento de sincronización | Manual, con el botón **Subir cambios guardados** (diagrama de flujo). TODO: decidir si además se intenta automáticamente al volver la conexión. |
 | Identificadores | UUID generado en el cliente al crear el registro. |
 | Campos técnicos en cada tabla | `created_at`, `updated_at` y `deleted_at` (agrégalos al modelo de la sección 2). |
 | Eliminaciones | *Soft delete:* se llena `deleted_at` en lugar de borrar la fila, para que la eliminación también se sincronice. |
@@ -388,18 +388,17 @@ RNF-02 es el requisito técnico más difícil del MVP. Defínelo ahora para no i
 ---
 
 ## 7. Matriz de trazabilidad
-
-**Qué es:** conecta cada requisito con dónde se diseña. Si un requisito no tiene pantalla o tabla, falta diseño; si una pantalla no tiene requisito, sobra.
+Conecta cada requisito con dónde se diseña. Si un requisito no tiene pantalla o tabla, falta diseño; si una pantalla no tiene requisito, sobra.
 
 | Requisito | Caso de uso | Pantalla | Tablas | Prioridad |
 | --- | --- | --- | --- | :---: |
-| RF-01 | CU-01 | Principal, Formulario | `entrenamiento` | 🔴 Must |
-| RF-02 | TODO | TODO | TODO | 🔴 Must |
-| RF-03 | TODO | TODO | TODO | 🔴 Must |
-| RF-04 | TODO | TODO | TODO | 🟠 Should |
-| RF-05 | TODO | TODO | TODO | 🟠 Should |
-| RF-06 | TODO | TODO | TODO | 🟠 Should |
-| RF-07 | TODO | TODO | TODO | 🟠 Should |
+| RF-01 | CU-01, CU-02, CU-03  | Principal, Formulario | `entrenamiento` | 🔴 Must |
+| RF-02 | CU-02, CU-03  | Principal, Regis Entrenos | `entrenamiento` | 🔴 Must |
+| RF-03 | CU-10 | Tipos | `Tipo` | 🔴 Must |
+| RF-04 | CU-04 | Principal, Form Metas | `Meta` | 🟠 Should |
+| RF-05 | CU-05, CU-06 | Principal, Regis Metas | `Meta` | 🟠 Should |
+| RF-06 | CU-07, CU-08 | Stats | `entrenamiento` `Meta` | 🟠 Should |
+| RF-07 | CU-09 | Principal, Sincro | `Metas` `entrenamiento` | 🟠 Should |
 
 ---
 
@@ -409,8 +408,6 @@ Dividir el MVP en iteraciones cortas que terminen en algo usable. Sigue el orden
 
 | Iteración | Objetivo | Incluye (M-xx) | Entregable | Fecha objetivo |
 | --- | --- | --- | --- | --- |
-| **1** | Registrar entrenamientos | M-01, M-02, M-03 | Puedo registrar desde el celular | TODO |
-| **2** | TODO | TODO | TODO | TODO |
-| **3** | TODO | TODO | TODO | TODO |
-
-➡️ **Siguiente fase:** Implementación
+| **1** | Registrar entrenamientos | M-01, M-02, M-03 | Puedo registrar desde el celular | Nov 21 |
+| **2** | Registrar metas y ver charts | M-04, M-05 | Puedo ver mis estadísticas | Nov 22 |
+| **3** | Diseño estilo ASCII | M-06 | Tengo un diseño responsive y agradable | Nov 23 |
